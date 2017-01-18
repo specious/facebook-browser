@@ -1,0 +1,28 @@
+{
+  "name": "facebook-portal",
+  "version": "1.0.0",
+  "description": "Your portal to the Facebook universe",
+  "private": true,
+  "main": "index.js",
+  "scripts": {
+    "build": "elm make --yes src/Main.elm --output app/lib/index.js",
+    "watch": "nodemon --watch src --ext elm --exec 'npm run -s build'",
+    "serve": "cd app && browser-sync start --server --files \"lib/*.js, *.css\"",
+    "start": "run-p serve watch"
+  },
+  "author": "Ildar Sagdejev",
+  "license": "ISC",
+  "homepage": "https://github.com/specious/facebook-browser",
+  "bugs": "https://github.com/specious/facebook-browser/issues",
+  "repository": {
+    "type": "git",
+    "url": "specious/facebook-browser"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "browser-sync": "2.18.6",
+    "elm": "0.18.0",
+    "nodemon": "1.11.0",
+    "npm-run-all": "4.0.0"
+  }
+}
