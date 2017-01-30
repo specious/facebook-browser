@@ -9,7 +9,10 @@ import Regex
 import Http
 
 
-dataUrl = "./data/index.json"
+dataUrl =
+  "./data/index.json"
+
+
 
 -- # Main
 
@@ -27,7 +30,9 @@ main =
 
 -- # Model
 
-type alias Items = List Item
+
+type alias Items =
+  List Item
 
 
 type alias Model =
@@ -36,16 +41,18 @@ type alias Model =
   }
 
 
-init : (Model, Cmd Msg)
+init : ( Model, Cmd Msg )
 init =
   ( Model "" Nothing
   , getItemData
   )
 
+
 type alias Item =
   { id : String
   , title : String
   }
+
 
 itemDecoder : Decoder Item
 itemDecoder =
@@ -57,6 +64,8 @@ itemDecoder =
 itemsDecoder : Decoder (List Item)
 itemsDecoder =
   list itemDecoder
+
+
 
 -- # Update
 
@@ -71,24 +80,27 @@ getItemData =
   Http.send DataLoaded (Http.get dataUrl itemsDecoder)
 
 
-update : Msg -> Model -> (Model, Cmd Msg)
+update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
   case msg of
     Change newContent ->
-      ({ model | searchStr = newContent }, Cmd.none)
+      ( { model | searchStr = newContent }, Cmd.none )
 
     DataLoaded (Ok newItems) ->
-      ({ model | maybeItems = Just newItems }, Cmd.none)
+      ( { model | maybeItems = Just newItems }, Cmd.none )
 
     DataLoaded (Err _) ->
-      (model, Cmd.none)
+      ( model, Cmd.none )
+
 
 
 -- # Subscriptions
 
+
 subscriptions : Model -> Sub Msg
 subscriptions model =
   Sub.none
+
 
 
 -- # View
@@ -101,21 +113,26 @@ view model =
     , viewItems model.searchStr model.maybeItems
     ]
 
+
 viewItems : String -> Maybe Items -> Html Msg
 viewItems searchStr maybeItems =
   case maybeItems of
     Nothing ->
       div [] [ text "Loading..." ]
+
     Just items ->
       let
-        filteredItems = List.filter (itemFilter searchStr) items
+        filteredItems =
+          List.filter (itemFilter searchStr) items
       in
         ul [] (List.map viewItem filteredItems)
+
 
 itemFilter searchStr item =
   Regex.contains ((Regex.regex >> Regex.caseInsensitive) searchStr) item.title
 
+
 viewItem : Item -> Html Msg
 viewItem item =
   li []
-   [ a [ href ("https://www.facebook.com/" ++ item.id) ] [ text item.title ] ]
+    [ a [ href ("https://www.facebook.com/" ++ item.id) ] [ text item.title ] ]
