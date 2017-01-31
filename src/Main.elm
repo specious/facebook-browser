@@ -1,12 +1,14 @@
 module Main exposing (..)
 
 import Html exposing (..)
-import Html.Attributes exposing (placeholder, href)
+import Html.Attributes exposing (placeholder, id, href)
 import Html.Events exposing (onInput)
 import Json.Decode exposing (string, list, Decoder)
 import Json.Decode.Pipeline exposing (decode, required)
 import Regex
 import Http
+import Task
+import Dom
 
 
 dataUrl =
@@ -71,7 +73,8 @@ itemsDecoder =
 
 
 type Msg
-  = Change String
+  = NoOp
+  | Change String
   | DataLoaded (Result Http.Error Items)
 
 
@@ -83,11 +86,14 @@ getItemData =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
   case msg of
+    NoOp ->
+      ( model, Cmd.none )
+
     Change newContent ->
       ( { model | searchStr = newContent }, Cmd.none )
 
     DataLoaded (Ok newItems) ->
-      ( { model | maybeItems = Just newItems }, Cmd.none )
+      ( { model | maybeItems = Just newItems }, Task.attempt (\_ -> NoOp) (Dom.focus "search") )
 
     DataLoaded (Err _) ->
       ( model, Cmd.none )
@@ -109,7 +115,7 @@ subscriptions model =
 view : Model -> Html Msg
 view model =
   div []
-    [ input [ placeholder "Search...", onInput Change ] []
+    [ input [ id "search", placeholder "Search...", onInput Change ] []
     , viewItems model.searchStr model.maybeItems
     ]
 
