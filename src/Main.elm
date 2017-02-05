@@ -4,7 +4,7 @@ import Html exposing (Html, text, div, img, a, span, h3, ul, li, input, button)
 import Html.Attributes exposing (placeholder, id, style, href, src)
 import Html.Events exposing (onInput, onClick)
 import Json.Decode exposing (string, list, Decoder)
-import Json.Decode.Pipeline exposing (decode, required)
+import Json.Decode.Pipeline exposing (decode, required, hardcoded)
 import Regex
 import Http
 import Task
@@ -52,7 +52,7 @@ type alias Model =
 
 init : ( Model, Cmd Msg )
 init =
-  ( Model "" Nothing Text
+  ( Model "" Nothing Thumbnails
   , getItemData
   )
 
@@ -60,6 +60,7 @@ init =
 type alias Item =
   { id : String
   , title : String
+  , hidden : Bool
   }
 
 
@@ -68,6 +69,7 @@ itemDecoder =
   decode Item
     |> required "id" string
     |> required "title" string
+    |> hardcoded False
 
 
 itemsDecoder : Decoder (List Item)
@@ -151,25 +153,34 @@ viewItems searchStr maybeItems viewMode =
     Just items ->
       let
         filteredItems =
-          List.filter (itemFilter searchStr) items
+          List.map (\item -> { item | hidden = itemFilter searchStr item }) items
       in
         ul [] (List.map (viewItem viewMode) filteredItems)
 
 
 itemFilter searchStr item =
-  Regex.contains ((Regex.regex >> Regex.caseInsensitive) searchStr) item.title
+  not <| Regex.contains ((Regex.regex >> Regex.caseInsensitive) searchStr) item.title
 
 
 viewItem : ViewMode -> Item -> Html Msg
 viewItem viewMode item =
-  case viewMode of
-    Text ->
-      li
-        []
-        [ a [ href ("https://www.facebook.com/" ++ item.id) ] [ text item.title ] ]
+  let
+    cullStyle =
+      case item.hidden of
+        True ->
+          [ ( "display", "none" ) ]
 
-    _ ->
-      viewItemWithThumbnail viewMode item
+        False ->
+          []
+  in
+    case viewMode of
+      Text ->
+        li
+          [ style cullStyle ]
+          [ a [ href ("https://www.facebook.com/" ++ item.id) ] [ text item.title ] ]
+
+      _ ->
+        viewItemWithThumbnail viewMode cullStyle item
 
 
 viewThumbnail id styles =
@@ -180,22 +191,28 @@ viewThumbnail id styles =
     [ img [ src ("./data/images/" ++ id) ] [] ]
 
 
-viewItemWithThumbnail viewMode item =
+viewItemWithThumbnail viewMode extraStyle item =
   let
     listStyle =
-      [ ( "list-style-type", "none" )
-      , ( "display", "inline-block" )
-      ]
+      [ ( "list-style-type", "none" ) ]
   in
     case viewMode of
       Thumbnails ->
         li
-          [ style listStyle ]
+          [ style <|
+              List.foldr List.append
+                listStyle
+                [ [ ( "display", "inline-block" ) ], extraStyle ]
+          ]
           [ viewThumbnail item.id [] ]
 
       ThumbnailsWithTitle ->
         li
-          [ style <| List.append listStyle [ ( "display", "flex" ) ] ]
+          [ style <|
+              List.foldr List.append
+                listStyle
+                [ [ ( "display", "flex" ) ], extraStyle ]
+          ]
           [ viewThumbnail item.id [ ( "margin-right", "8px" ) ]
           , h3
               [ style
