@@ -15,10 +15,6 @@ dataUrl =
   "./data/index.json"
 
 
-
--- # Main
-
-
 main : Program Never Model Msg
 main =
   Html.program
@@ -30,7 +26,7 @@ main =
 
 
 
--- # Model
+-- MODEL
 
 
 type ViewMode
@@ -76,7 +72,7 @@ itemsDecoder =
 
 
 
--- # Update
+-- UPDATE
 
 
 type Msg
@@ -119,7 +115,7 @@ update msg model =
 
 
 
--- # Subscriptions
+-- SUBSCRIPTIONS
 
 
 subscriptions : Model -> Sub Msg
@@ -128,18 +124,43 @@ subscriptions model =
 
 
 
--- # View
+-- VIEW
 
 
 view : Model -> Html Msg
 view model =
   div []
     [ input [ id "search", placeholder "Search...", onInput Change ] []
-    , button [ onClick SetViewText ] [ text "Title" ]
-    , button [ onClick SetViewThumbnails ] [ text "Thumb" ]
-    , button [ onClick SetViewThumbnailsWithTitle ] [ text "Thumb + Title" ]
+    , viewModeButtons
     , viewItems model.searchStr model.maybeItems model.viewMode
     ]
+
+
+viewModeButtons : Html Msg
+viewModeButtons =
+  let
+    glyphColor =
+      "#666"
+
+    buttonStyle =
+      [ ( "width", "22px" )
+      , ( "height", "22px" )
+      , ( "padding-left", "0" )
+      , ( "padding-right", "0" )
+      , ( "margin-left", "4px" )
+      , ( "background-color", "white" )
+      , ( "color", glyphColor )
+      ]
+
+    textViewButtonStyle =
+      List.append buttonStyle
+        [ ( "font-style", "italic" ) ]
+  in
+    div [ style [ ( "display", "inline-block" ) ] ]
+      [ button [ style textViewButtonStyle, onClick SetViewText ] [ text "A" ]
+      , button [ style buttonStyle, onClick SetViewThumbnails ] [ text "⦁" ]
+      , button [ style buttonStyle, onClick SetViewThumbnailsWithTitle ] [ text "≡" ]
+      ]
 
 
 viewItems : String -> Maybe Items -> ViewMode -> Html Msg
@@ -153,7 +174,7 @@ viewItems searchStr maybeItems viewMode =
         filteredItems =
           List.filter (itemFilter searchStr) items
       in
-        ul [] (List.map (viewItem viewMode) filteredItems)
+        ul [ style [ ( "padding", "0" ) ] ] (List.map (viewItem viewMode) filteredItems)
 
 
 itemFilter searchStr item =
@@ -186,6 +207,12 @@ viewItemWithThumbnail viewMode item =
       [ ( "list-style-type", "none" )
       , ( "display", "inline-block" )
       ]
+
+    linkStyle =
+      [ ( "margin", "auto" )
+      , ( "margin-left", "0" )
+      , ( "color", "blue" )
+      ]
   in
     case viewMode of
       Thumbnails ->
@@ -198,12 +225,7 @@ viewItemWithThumbnail viewMode item =
           [ style <| List.append listStyle [ ( "display", "flex" ) ] ]
           [ viewThumbnail item.id [ ( "margin-right", "8px" ) ]
           , h3
-              [ style
-                  [ ( "margin", "auto" )
-                  , ( "margin-left", "0" )
-                  , ( "color", "blue" )
-                  ]
-              ]
+              [ style linkStyle ]
               [ text item.title ]
           ]
 

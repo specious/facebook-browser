@@ -1,9 +1,8 @@
 {
-  "name": "facebook-portal",
+  "name": "facebook-browser",
   "version": "1.0.0",
   "description": "Your portal to the Facebook universe",
   "private": true,
-  "main": "index.js",
   "scripts": {
     "build": "elm make --yes src/Main.elm --output app/lib/index.js",
     "watch": "nodemon --watch src --ext elm --exec 'npm run -s build'",
