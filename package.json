@@ -1,7 +1,7 @@
 {
   "name": "facebook-browser",
   "version": "1.0.0",
-  "description": "Your portal to the Facebook universe",
+  "description": "A searchable index of the Facebook pages you follow",
   "private": true,
   "scripts": {
     "build": "elm make --yes src/Main.elm --output app/lib/index.js",

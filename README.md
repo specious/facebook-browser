@@ -18,24 +18,42 @@ The app loads the index of facebook pages from `app/data/index.json', where page
 ]
 ```
 
-Thumbnail images are expected to reside in `app/data/images/`, named by their id (no extension).
+Thumbnail images are expected to reside in `app/data/images/`, named only by their id (no extension). Images might be JPEG, PNG, etc. but no distinction is made based on the file format.
 
-With [facebook-indexer](https://github.com/specious/facebook-indexer), you can generate the files to browse the Facebook pages that you follow.
+Use the [facebook-indexer](https://github.com/specious/facebook-indexer) script, which in turn uses the [facebook-cli](https://github.com/specious/facebook-cli) tool, to generate the page index and image files of the Facebook pages that you follow.
 
 ## Build and run
 
-Build the interface with:
+Install dependencies and build the user interface with:
 
 ```
-npm install
-npm run build
+yarn install
+yarn build
 ```
 
 Then you can open `app/index.html` in your browser.
 
+However, the data won't load because requesting a file from a file:// URI falls under the policy of blocking cross-origin requests [implemented by browsers](https://stackoverflow.com/a/23118676) due to security concerns. Run:
+
+```
+yarn serve
+```
+
+This will start a local server and open the index page in your default browser.
+
 ## Share online
 
-You can upload your searchable index online and share it.  Everything is in the `app/` directory.
+You can upload your searchable index online and share it. Everything is in the `app/` directory.
+
+## Develop
+
+This application is written in [Elm](http://elm-lang.org). The Elm compiler builds the JavaScript bundle which powers the final product.
+
+To start the source file watcher and local server, run:
+
+```
+yarn start
+```
 
 ## License
 
