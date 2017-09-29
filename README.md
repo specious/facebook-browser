@@ -4,9 +4,11 @@ A searchable index of your favorite Facebook pages.
 
 ![Screenshot](screenshot.png)
 
-## Setup
+## Generate the index
 
-The app loads the index of facebook pages from `app/data/index.json', where pages are listed by their id and title:
+Use the [facebook-indexer](https://github.com/specious/facebook-indexer) script, which in turn uses the [facebook-cli](https://github.com/specious/facebook-cli) tool, to generate the page index and image files of the Facebook pages that you follow.
+
+The app loads the index of facebook pages from `app/data/index.json`, where pages are listed by their id and title:
 
 ```json
 [
@@ -20,7 +22,14 @@ The app loads the index of facebook pages from `app/data/index.json', where page
 
 Thumbnail images are expected to reside in `app/data/images/`, named only by their id (no extension). Images might be JPEG, PNG, etc. but no distinction is made based on the file format.
 
-Use the [facebook-indexer](https://github.com/specious/facebook-indexer) script, which in turn uses the [facebook-cli](https://github.com/specious/facebook-cli) tool, to generate the page index and image files of the Facebook pages that you follow.
+### Try the sample index
+
+To get started right away with a sample index:
+
+```
+cp -r app/data/images-sample app/data/images
+cp app/data/index-sample.json app/data/index.json
+```
 
 ## Build and run
 
