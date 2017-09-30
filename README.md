@@ -39,7 +39,7 @@ There's not much there, but you can see how it works.
 - Clone the [facebook-indexer](https://github.com/specious/facebook-indexer) repository
 - Build the page index with:
   ```
-  FORMAT=json make
+  make FORMAT=json ICON_HEIGHT=50
   ```
 - Place the `index.json` file and the `images/` directory in this project's `app/data/` folder.
 
