@@ -130,36 +130,48 @@ subscriptions model =
 view : Model -> Html Msg
 view model =
   div []
-    [ input [ id "search", placeholder "Search...", onInput Change ] []
-    , viewModeButtons
+    [ viewSearchField model.searchStr model.maybeItems
+    , viewModeControls
     , viewItems model.searchStr model.maybeItems model.viewMode
     ]
 
 
-viewModeButtons : Html Msg
-viewModeButtons =
+viewSearchField : String -> Maybe Items -> Html Msg
+viewSearchField searchStr maybeItems =
+  div []
+    [ input [ id "search", placeholder "Search...", onInput Change ] []
+    , viewSearchStats searchStr maybeItems
+    ]
+
+
+viewSearchStats : String -> Maybe Items -> Html Msg
+viewSearchStats searchStr maybeItems =
+  case maybeItems of
+    Nothing ->
+      span [] [ text " (loading...)" ]
+
+    Just items ->
+      let
+        count =
+          List.length (filteredItems searchStr items)
+      in
+        span [] [ text <| " (" ++ toString count ++ " pages)" ]
+
+
+viewModeControls : Html Msg
+viewModeControls =
   let
-    glyphColor =
-      "#666"
-
     buttonStyle =
-      [ ( "width", "22px" )
-      , ( "height", "22px" )
-      , ( "padding-left", "0" )
-      , ( "padding-right", "0" )
-      , ( "margin-left", "4px" )
+      [ ( "height", "22px" )
+      , ( "margin-right", "4px" )
       , ( "background-color", "white" )
-      , ( "color", glyphColor )
+      , ( "color", "#666" )
       ]
-
-    textViewButtonStyle =
-      List.append buttonStyle
-        [ ( "font-style", "italic" ) ]
   in
-    div [ style [ ( "display", "inline-block" ) ] ]
-      [ button [ style textViewButtonStyle, onClick SetViewText ] [ text "A" ]
-      , button [ style buttonStyle, onClick SetViewThumbnails ] [ text "⦁" ]
-      , button [ style buttonStyle, onClick SetViewThumbnailsWithTitle ] [ text "≡" ]
+    div [ style [ ( "display", "inline-block" ), ( "margin-top", "6px" ), ( "margin-bottom", "4px" ) ] ]
+      [ button [ style buttonStyle, onClick SetViewText ] [ text "title" ]
+      , button [ style buttonStyle, onClick SetViewThumbnails ] [ text "image" ]
+      , button [ style buttonStyle, onClick SetViewThumbnailsWithTitle ] [ text "image and title" ]
       ]
 
 
@@ -170,15 +182,23 @@ viewItems searchStr maybeItems viewMode =
       div [] [ text "Loading..." ]
 
     Just items ->
-      let
-        filteredItems =
-          List.filter (itemFilter searchStr) items
-      in
-        ul [ style [ ( "padding", "0" ) ] ] (List.map (viewItem viewMode) filteredItems)
+      ul
+        [ style
+            [ ( "margin", "0" )
+            , ( "padding", "0" )
+            ]
+        ]
+        (List.map (viewItem viewMode) (filteredItems searchStr items))
 
 
+itemFilter : String -> Item -> Bool
 itemFilter searchStr item =
   Regex.contains ((Regex.regex >> Regex.caseInsensitive) searchStr) item.title
+
+
+filteredItems : String -> Items -> Items
+filteredItems searchStr items =
+  List.filter (itemFilter searchStr) items
 
 
 viewItem : ViewMode -> Item -> Html Msg
