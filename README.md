@@ -31,6 +31,18 @@ cp -r app/data/images-sample app/data/images
 cp app/data/index-sample.json app/data/index.json
 ```
 
+There's not much there, but you can see how it works.
+
+### Build an index of the entire set of pages you have Liked on Facebook
+
+- Install and configure [facebook-cli](https://github.com/specious/facebook-cli)
+- Clone the [facebook-indexer](https://github.com/specious/facebook-indexer) repository
+- Build the page index with:
+  ```
+  FORMAT=json make
+  ```
+- Place the `index.json` file and the `images/` directory in this project's `app/data/` folder.
+
 ## Build and run
 
 Install dependencies and build the user interface with:
