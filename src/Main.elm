@@ -1,7 +1,7 @@
 module Main exposing (..)
 
 import Html exposing (Html, text, div, img, a, span, h3, ul, li, input, button)
-import Html.Attributes exposing (placeholder, id, style, href, src)
+import Html.Attributes exposing (placeholder, id, style, href, src, title)
 import Html.Events exposing (onInput, onClick)
 import Json.Decode exposing (string, list, Decoder)
 import Json.Decode.Pipeline exposing (decode, required)
@@ -127,6 +127,10 @@ subscriptions model =
 -- VIEW
 
 
+type alias StyleList =
+  List ( String, String )
+
+
 view : Model -> Html Msg
 view model =
   div []
@@ -213,14 +217,16 @@ viewItem viewMode item =
       viewItemWithThumbnail viewMode item
 
 
-viewThumbnail id styles =
+viewThumbnail : String -> String -> StyleList -> Html Msg
+viewThumbnail id hoverTip styles =
   a
     [ href ("https://www.facebook.com/" ++ id)
     , style styles
     ]
-    [ img [ src ("./data/images/" ++ id) ] [] ]
+    [ img [ src ("./data/images/" ++ id), title hoverTip ] [] ]
 
 
+viewItemWithThumbnail : ViewMode -> Item -> Html Msg
 viewItemWithThumbnail viewMode item =
   let
     listStyle =
@@ -238,12 +244,12 @@ viewItemWithThumbnail viewMode item =
       Thumbnails ->
         li
           [ style listStyle ]
-          [ viewThumbnail item.id [] ]
+          [ viewThumbnail item.id item.title [] ]
 
       ThumbnailsWithTitle ->
         li
           [ style <| List.append listStyle [ ( "display", "flex" ) ] ]
-          [ viewThumbnail item.id [ ( "margin-right", "8px" ) ]
+          [ viewThumbnail item.id "" [ ( "margin-right", "8px" ) ]
           , h3
               [ style linkStyle ]
               [ text item.title ]
