@@ -1,6 +1,6 @@
 module Main exposing (..)
 
-import Html exposing (Html, text, div, img, a, span, h3, ul, li, input, button)
+import Html exposing (Html, text, div, img, a, span, ul, li, input, button)
 import Html.Attributes exposing (placeholder, id, style, href, src, title)
 import Html.Events exposing (onInput, onClick)
 import Json.Decode exposing (string, list, Decoder)
@@ -205,13 +205,18 @@ filteredItems searchStr items =
   List.filter (itemFilter searchStr) items
 
 
+pageLink : String -> String
+pageLink id =
+  "https://www.facebook.com/" ++ id
+
+
 viewItem : ViewMode -> Item -> Html Msg
 viewItem viewMode item =
   case viewMode of
     Text ->
       li
         []
-        [ a [ href ("https://www.facebook.com/" ++ item.id) ] [ text item.title ] ]
+        [ a [ href <| pageLink item.id ] [ text item.title ] ]
 
     _ ->
       viewItemWithThumbnail viewMode item
@@ -220,7 +225,7 @@ viewItem viewMode item =
 viewThumbnail : String -> String -> StyleList -> Html Msg
 viewThumbnail id hoverTip styles =
   a
-    [ href ("https://www.facebook.com/" ++ id)
+    [ href <| pageLink id
     , style styles
     ]
     [ img [ src ("./data/images/" ++ id), title hoverTip ] [] ]
@@ -237,7 +242,7 @@ viewItemWithThumbnail viewMode item =
     linkStyle =
       [ ( "margin", "auto" )
       , ( "margin-left", "0" )
-      , ( "color", "blue" )
+      , ( "text-decoration", "none" )
       ]
   in
     case viewMode of
@@ -250,8 +255,7 @@ viewItemWithThumbnail viewMode item =
         li
           [ style <| List.append listStyle [ ( "display", "flex" ) ] ]
           [ viewThumbnail item.id "" [ ( "margin-right", "8px" ) ]
-          , h3
-              [ style linkStyle ]
+          , a [ href <| pageLink item.id, style linkStyle ]
               [ text item.title ]
           ]
 
