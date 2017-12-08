@@ -39,16 +39,20 @@ type alias Items =
   List Item
 
 
+type alias LoadStatus =
+  Maybe Http.Error
+
 type alias Model =
   { searchStr : String
   , maybeItems : Maybe Items
   , viewMode : ViewMode
+  , loadStatus : LoadStatus
   }
 
 
 init : ( Model, Cmd Msg )
 init =
-  ( Model "" Nothing Text
+  ( Model "" Nothing Text Nothing
   , getItemData
   )
 
@@ -110,8 +114,8 @@ update msg model =
     DataLoaded (Ok newItems) ->
       ( { model | maybeItems = Just newItems }, Task.attempt (\_ -> NoOp) (Dom.focus "search") )
 
-    DataLoaded (Err _) ->
-      ( model, Cmd.none )
+    DataLoaded (Err httpError) ->
+      ( { model | loadStatus = Just httpError }, Cmd.none )
 
 
 
@@ -134,32 +138,41 @@ type alias StyleList =
 view : Model -> Html Msg
 view model =
   div []
-    [ viewSearchField model.searchStr model.maybeItems
+    [ viewSearchField model.loadStatus model.searchStr model.maybeItems
     , viewModeControls
-    , viewItems model.searchStr model.maybeItems model.viewMode
+    , viewItems model.loadStatus model.searchStr model.maybeItems model.viewMode
     ]
 
 
-viewSearchField : String -> Maybe Items -> Html Msg
-viewSearchField searchStr maybeItems =
+viewSearchField : LoadStatus -> String -> Maybe Items -> Html Msg
+viewSearchField loadStatus searchStr maybeItems =
   div []
     [ input [ id "search", placeholder "Search...", onInput Change ] []
-    , viewSearchStats searchStr maybeItems
+    , viewSearchStats loadStatus searchStr maybeItems
     ]
 
 
-viewSearchStats : String -> Maybe Items -> Html Msg
-viewSearchStats searchStr maybeItems =
-  case maybeItems of
-    Nothing ->
-      span [] [ text " (loading...)" ]
+viewSearchStats : LoadStatus -> String -> Maybe Items -> Html Msg
+viewSearchStats loadStatus searchStr maybeItems =
+  let
+    message =
+      case maybeItems of
+        Nothing ->
+          case loadStatus of
+            Nothing ->
+              "loading..."
 
-    Just items ->
-      let
-        count =
-          List.length (filteredItems searchStr items)
-      in
-        span [] [ text <| " (" ++ toString count ++ " pages)" ]
+            Just _ ->
+              "failed to load data"
+
+        Just items ->
+          let
+            count =
+              List.length (filteredItems searchStr items)
+          in
+            toString count ++ " pages"
+  in
+    span [] [ text <| " (" ++ message ++ ")" ]
 
 
 viewModeControls : Html Msg
@@ -179,11 +192,16 @@ viewModeControls =
       ]
 
 
-viewItems : String -> Maybe Items -> ViewMode -> Html Msg
-viewItems searchStr maybeItems viewMode =
+viewItems : LoadStatus -> String -> Maybe Items -> ViewMode -> Html Msg
+viewItems loadStatus searchStr maybeItems viewMode =
   case maybeItems of
     Nothing ->
-      div [] [ text "Loading..." ]
+      case loadStatus of
+        Nothing ->
+          div [] [ text "Loading..." ]
+
+        Just httpError ->
+          div [ style [ ( "color", "red" ) ] ] [ text <| "HTTP Error: " ++ (httpErrorString httpError) ]
 
     Just items ->
       ul
@@ -261,3 +279,26 @@ viewItemWithThumbnail viewMode item =
 
       _ ->
         div [] [ text "Should never happen" ]
+
+
+
+-- HELPERS
+
+
+httpErrorString : Http.Error -> String
+httpErrorString httpError =
+  case httpError of
+    Http.BadUrl url ->
+      "Bad URL: " ++ url
+
+    Http.Timeout ->
+      "Request timed out"
+
+    Http.NetworkError ->
+      "Network error"
+
+    Http.BadStatus response ->
+      toString response.status.code ++ " (" ++ response.status.message ++ ")"
+
+    Http.BadPayload explanation response ->
+      "Bad payload: " ++ explanation
