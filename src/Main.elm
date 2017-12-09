@@ -228,29 +228,15 @@ pageLink id =
   "https://www.facebook.com/" ++ id
 
 
-viewItem : ViewMode -> Item -> Html Msg
-viewItem viewMode item =
-  case viewMode of
-    Text ->
-      li
-        []
-        [ a [ href <| pageLink item.id ] [ text item.title ] ]
-
-    _ ->
-      viewItemWithThumbnail viewMode item
-
-
 viewThumbnail : String -> String -> StyleList -> Html Msg
 viewThumbnail id hoverTip styles =
   a
-    [ href <| pageLink id
-    , style styles
-    ]
+    [ href <| pageLink id, style styles ]
     [ img [ src ("./data/images/" ++ id), title hoverTip ] [] ]
 
 
-viewItemWithThumbnail : ViewMode -> Item -> Html Msg
-viewItemWithThumbnail viewMode item =
+viewItem : ViewMode -> Item -> Html Msg
+viewItem viewMode item =
   let
     listStyle =
       [ ( "list-style-type", "none" )
@@ -264,6 +250,11 @@ viewItemWithThumbnail viewMode item =
       ]
   in
     case viewMode of
+      Text ->
+        li
+          []
+          [ a [ href <| pageLink item.id ] [ text item.title ] ]
+
       Thumbnails ->
         li
           [ style listStyle ]
@@ -276,9 +267,6 @@ viewItemWithThumbnail viewMode item =
           , a [ href <| pageLink item.id, style linkStyle ]
               [ text item.title ]
           ]
-
-      _ ->
-        div [] [ text "Should never happen" ]
 
 
 
