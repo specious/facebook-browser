@@ -29,19 +29,6 @@ main =
 -- MODEL
 
 
-type ViewMode
-  = Text
-  | Thumbnails
-  | ThumbnailsWithTitle
-
-
-type alias Items =
-  List Item
-
-
-type alias LoadStatus =
-  Maybe Http.Error
-
 type alias Model =
   { searchStr : String
   , maybeItems : Maybe Items
@@ -63,6 +50,10 @@ type alias Item =
   }
 
 
+type alias Items =
+  List Item
+
+
 itemDecoder : Decoder Item
 itemDecoder =
   decode Item
@@ -73,6 +64,16 @@ itemDecoder =
 itemsDecoder : Decoder (List Item)
 itemsDecoder =
   list itemDecoder
+
+
+type ViewMode
+  = Text
+  | Thumbnails
+  | ThumbnailsWithTitle
+
+
+type alias LoadStatus =
+  Maybe Http.Error
 
 
 
