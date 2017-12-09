@@ -139,7 +139,7 @@ view : Model -> Html Msg
 view model =
   div []
     [ viewSearchField model.loadStatus model.searchStr model.maybeItems
-    , viewModeControls
+    , viewModeControls model.viewMode
     , viewItems model.loadStatus model.searchStr model.maybeItems model.viewMode
     ]
 
@@ -175,21 +175,50 @@ viewSearchStats loadStatus searchStr maybeItems =
     span [] [ text <| " (" ++ message ++ ")" ]
 
 
-viewModeControls : Html Msg
-viewModeControls =
+viewModeControls : ViewMode -> Html Msg
+viewModeControls viewMode =
+  div [ style [ ( "display", "inline-block" ), ( "margin-top", "6px" ), ( "margin-bottom", "4px" ) ] ]
+    [ viewModeButton viewMode Text
+    , viewModeButton viewMode Thumbnails
+    , viewModeButton viewMode ThumbnailsWithTitle
+    ]
+
+
+viewModeButton : ViewMode -> ViewMode -> Html Msg
+viewModeButton currentMode setsMode =
   let
-    buttonStyle =
+    baseStyle =
       [ ( "height", "22px" )
       , ( "margin-right", "4px" )
       , ( "background-color", "white" )
       , ( "color", "#666" )
       ]
-  in
-    div [ style [ ( "display", "inline-block" ), ( "margin-top", "6px" ), ( "margin-bottom", "4px" ) ] ]
-      [ button [ style buttonStyle, onClick SetViewText ] [ text "title" ]
-      , button [ style buttonStyle, onClick SetViewThumbnails ] [ text "image" ]
-      , button [ style buttonStyle, onClick SetViewThumbnailsWithTitle ] [ text "image and title" ]
+
+    activeStyle =
+      [ ( "color", "black" )
+      , ( "background-color", "darkgrey" )
+      , ( "border", "2px solid black" )
       ]
+
+    buttonStyle =
+      if setsMode == currentMode then
+        List.append baseStyle activeStyle
+      else
+        baseStyle
+
+    ( eventMsg, caption ) =
+      case setsMode of
+        Text ->
+          ( SetViewText, "title" )
+
+        Thumbnails ->
+          ( SetViewThumbnails, "image" )
+
+        ThumbnailsWithTitle ->
+          ( SetViewThumbnailsWithTitle, "image and title" )
+
+  in
+    button [ style buttonStyle, onClick eventMsg ] [ text caption ]
 
 
 viewItems : LoadStatus -> String -> Maybe Items -> ViewMode -> Html Msg
