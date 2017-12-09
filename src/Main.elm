@@ -81,7 +81,7 @@ itemsDecoder =
 
 type Msg
   = NoOp
-  | Change String
+  | Search String
   | SetViewText
   | SetViewThumbnails
   | SetViewThumbnailsWithTitle
@@ -99,8 +99,8 @@ update msg model =
     NoOp ->
       ( model, Cmd.none )
 
-    Change newContent ->
-      ( { model | searchStr = newContent }, Cmd.none )
+    Search newSearchStr ->
+      ( { model | searchStr = newSearchStr }, Cmd.none )
 
     SetViewText ->
       ( { model | viewMode = Text }, Cmd.none )
@@ -147,7 +147,7 @@ view model =
 viewSearchField : LoadStatus -> String -> Maybe Items -> Html Msg
 viewSearchField loadStatus searchStr maybeItems =
   div []
-    [ input [ id "search", placeholder "Search...", onInput Change ] []
+    [ input [ id "search", placeholder "Search...", onInput Search ] []
     , viewSearchStats loadStatus searchStr maybeItems
     ]
 
