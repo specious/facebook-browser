@@ -83,9 +83,7 @@ type alias LoadStatus =
 type Msg
   = NoOp
   | Search String
-  | SetViewText
-  | SetViewThumbnails
-  | SetViewThumbnailsWithTitle
+  | SetViewMode ViewMode
   | DataLoaded (Result Http.Error Items)
 
 
@@ -103,14 +101,8 @@ update msg model =
     Search newSearchStr ->
       ( { model | searchStr = newSearchStr }, Cmd.none )
 
-    SetViewText ->
-      ( { model | viewMode = Text }, Cmd.none )
-
-    SetViewThumbnails ->
-      ( { model | viewMode = Thumbnails }, Cmd.none )
-
-    SetViewThumbnailsWithTitle ->
-      ( { model | viewMode = ThumbnailsWithTitle }, Cmd.none )
+    SetViewMode newMode ->
+      ( { model | viewMode = newMode }, Cmd.none )
 
     DataLoaded (Ok newItems) ->
       ( { model | maybeItems = Just newItems }, Task.attempt (\_ -> NoOp) (Dom.focus "search") )
@@ -204,22 +196,23 @@ viewModeButton currentMode setsMode =
     buttonStyle =
       if setsMode == currentMode then
         List.append baseStyle activeStyle
+
       else
         baseStyle
 
-    ( eventMsg, caption ) =
+    caption =
       case setsMode of
         Text ->
-          ( SetViewText, "title" )
+          "title"
 
         Thumbnails ->
-          ( SetViewThumbnails, "image" )
+          "image"
 
         ThumbnailsWithTitle ->
-          ( SetViewThumbnailsWithTitle, "image and title" )
+          "image and title"
 
   in
-    button [ style buttonStyle, onClick eventMsg ] [ text caption ]
+    button [ style buttonStyle, onClick <| SetViewMode setsMode ] [ text caption ]
 
 
 viewItems : LoadStatus -> String -> Maybe Items -> ViewMode -> Html Msg
